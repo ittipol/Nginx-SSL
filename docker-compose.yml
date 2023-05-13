@@ -7,10 +7,18 @@ services:
     ports:
       - 80:80
       - 443:443
+      - 5000:5000
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/certs/server.pem:/etc/nginx/certs/nginx.key
       - ./nginx/certs/server.crt:/etc/nginx/certs/nginx.crt
+    depends_on:
+      - go
+      - nextjs
+
+  go:
+    build: go
+    container_name: go
 
   nextjs:
     build: nextjs
