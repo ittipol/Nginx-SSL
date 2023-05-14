@@ -2,21 +2,42 @@ package main
 
 import (
 	"fmt"
+	"go-nginx-ssl/apps"
+	"go-nginx-ssl/handlers"
+	"go-nginx-ssl/services"
 	"log"
+	"strings"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/utils"
+	"github.com/spf13/viper"
 )
 
+func init() {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	if err := viper.ReadInConfig(); err != nil {
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	}
+}
+
 func main() {
+
+	appValidator := apps.Newvalidator(validator.New())
+	authService := services.NewAuthService()
+	authHandler := handlers.NewAuthHandler(authService, appValidator)
 
 	app := fiber.New()
 
 	group := app.Group("", logger.New())
 
 	app.Get("/health", func(c *fiber.Ctx) error {
-		// time.Sleep(time.Second * 1)
 		return c.JSON("OK")
 	})
 
@@ -46,6 +67,8 @@ func main() {
 		})
 	})
 
-	log.Fatal(app.Listen(":5000"))
+	app.Post("/auth", authHandler.Login)
+
+	log.Fatal(app.Listen(fmt.Sprintf(":%v", viper.GetInt("app.port"))))
 
 }

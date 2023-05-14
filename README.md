@@ -1,45 +1,39 @@
 # NGINX SSL Server
+- Full Example Configuration https://www.nginx.com/resources/wiki/start/topics/examples/full/
 
 ## Gen SSL private key & Cert 
 ``` bash
 # Update hostname in gen.sh and ssl.cnf
-# ex. hostname = localhost, myhost
+# e.g. hostname = localhost, myhost
 ./gen.sh
 ```
 
-## NGINX SSL Server Configuration
+## Go Packages
+- zap [https://pkg.go.dev/go.uber.org/zap](https://pkg.go.dev/go.uber.org/zap)
+- viper [https://pkg.go.dev/github.com/spf13/viper](https://pkg.go.dev/github.com/spf13/viper)
+- fiber [https://pkg.go.dev/github.com/gofiber/fiber/v2](https://pkg.go.dev/github.com/gofiber/fiber/v2)
+- gorm [https://pkg.go.dev/gorm.io/gorm](https://pkg.go.dev/gorm.io/gorm)
+- gorm MySQL driver [https://pkg.go.dev/gorm.io/driver/mysql](https://pkg.go.dev/gorm.io/driver/mysql)
+- validator [https://pkg.go.dev/github.com/go-playground/validator](https://pkg.go.dev/github.com/go-playground/validator)
 
-``` nginx
-events {
+``` bash
+# Install zap package
+go get -u go.uber.org/zap
 
-}
+# Install viper package
+go get github.com/spf13/viper
 
-http {
-  server {
+# Install fiber package
+go get github.com/gofiber/fiber/v2
 
-    listen 80 default_server;
+# Install gorm package
+go get gorm.io/gorm
 
+# Install gorm MySQL driver package
+go gorm.io/driver/mysql
 
-    server_name _;
-
-
-    return 301 https://$host$request_uri;
-
-  }
-
-  server {
-    listen 443 ssl;
-
-    ssl_certificate     /etc/nginx/certs/nginx.crt;
-    ssl_certificate_key /etc/nginx/certs/nginx.key;
-
-    location / {
-      proxy_set_header Host $http_host;
-      proxy_pass       http://nextjs:3000/;
-    }
-  }
-}
-
+# Install validator package
+go get github.com/go-playground/validator/v10
 ```
 
 ## Start server and application
