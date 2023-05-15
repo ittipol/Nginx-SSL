@@ -15,6 +15,7 @@
 - gorm [https://pkg.go.dev/gorm.io/gorm](https://pkg.go.dev/gorm.io/gorm)
 - gorm MySQL driver [https://pkg.go.dev/gorm.io/driver/mysql](https://pkg.go.dev/gorm.io/driver/mysql)
 - validator [https://pkg.go.dev/github.com/go-playground/validator](https://pkg.go.dev/github.com/go-playground/validator)
+- jwt [https://pkg.go.dev/github.com/golang-jwt/jwt](https://pkg.go.dev/github.com/golang-jwt/jwt)
 
 ``` bash
 # Install zap package
@@ -34,6 +35,9 @@ go gorm.io/driver/mysql
 
 # Install validator package
 go get github.com/go-playground/validator/v10
+
+# Install jwt package
+go get -u github.com/golang-jwt/jwt/v5
 ```
 
 ## Start server and application

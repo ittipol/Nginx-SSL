@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go-nginx-ssl/apps"
 	"go-nginx-ssl/handlers"
+	"go-nginx-ssl/repositories"
 	"go-nginx-ssl/services"
 	"log"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/utils"
 	"github.com/spf13/viper"
+	"gorm.io/gorm"
 )
 
 func init() {
@@ -29,8 +31,12 @@ func init() {
 
 func main() {
 
+	var db *gorm.DB
+
 	appValidator := apps.Newvalidator(validator.New())
-	authService := services.NewAuthService()
+
+	userRepository := repositories.NewUserRepository(db)
+	authService := services.NewAuthService(userRepository)
 	authHandler := handlers.NewAuthHandler(authService, appValidator)
 
 	app := fiber.New()
@@ -68,6 +74,7 @@ func main() {
 	})
 
 	app.Post("/auth", authHandler.Login)
+	app.Post("/refresh", authHandler.Refresh)
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%v", viper.GetInt("app.port"))))
 
