@@ -39,7 +39,14 @@ func NewBadRequestError() error {
 func NewUnexpectedError() error {
 	return &appError{
 		Code:    http.StatusInternalServerError,
-		Message: "unexpected error",
+		Message: "Unexpected Error",
+	}
+}
+
+func NewUnauthorizedError() error {
+	return &appError{
+		Code:    http.StatusUnauthorized,
+		Message: "Unauthorized",
 	}
 }
 

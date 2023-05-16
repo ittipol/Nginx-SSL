@@ -7,4 +7,6 @@ type authResponse struct {
 
 type AuthService interface {
 	Login(email string, password string) (res authResponse, err error)
+	Refresh(headers map[string]string) (res authResponse, err error)
+	Verify(headers map[string]string) error
 }

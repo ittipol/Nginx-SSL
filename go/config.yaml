@@ -1,5 +1,7 @@
 app:
   port: 5000
+  jwtAccessTokenSecret: kmJs8h9pyvPZWCFg3NI6qs7k4TOtIFAZ
+  jwtRefreshTokenSecret: GniSVJoUWBofh5tu9tU7FTXcwGHUMH6z
 
 database:
   username: root

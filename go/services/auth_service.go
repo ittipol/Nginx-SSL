@@ -1,21 +1,24 @@
 package services
 
 import (
+	"fmt"
+
+	"go-nginx-ssl/appUtils"
 	"go-nginx-ssl/errs"
+	"go-nginx-ssl/helpers"
 	"go-nginx-ssl/repositories"
-	"time"
+	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var hmacSampleSecret []byte
-
 type authService struct {
 	userRepository repositories.UserRepository
+	jwtToken       appUtils.JwtUtil
 }
 
-func NewAuthService(userRepository repositories.UserRepository) AuthService {
-	return &authService{userRepository}
+func NewAuthService(userRepository repositories.UserRepository, jwtToken appUtils.JwtUtil) AuthService {
+	return &authService{userRepository, jwtToken}
 }
 
 func (obj authService) Login(email string, password string) (res authResponse, err error) {
@@ -29,7 +32,7 @@ func (obj authService) Login(email string, password string) (res authResponse, e
 	// check password matching
 	_ = user.Password
 
-	accessToken, _, err := getToken(user.ID)
+	accessToken, refreshToken, err := obj.jwtToken.GenToken(user.ID)
 
 	if err != nil {
 		return res, errs.NewUnexpectedError()
@@ -37,25 +40,79 @@ func (obj authService) Login(email string, password string) (res authResponse, e
 
 	res = authResponse{
 		AccessToken:  accessToken,
-		RefreshToken: "",
+		RefreshToken: refreshToken,
 	}
 
 	return
 }
 
-func getToken(id int) (accessToken string, refreshToken string, err error) {
+func (obj authService) Refresh(headers map[string]string) (res authResponse, err error) {
 
-	// Gen access token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  id,
-		"nbf": time.Date(2015, 10, 10, 12, 0, 0, 0, time.UTC).Unix(),
-	})
+	value, err := helpers.GetHeader(headers, "Authorization")
 
-	// Sign and get the complete encoded token as a string using the secret
-	accessToken, err = token.SignedString(hmacSampleSecret)
+	if err != nil {
+		return res, errs.NewBadRequestError()
+	}
 
-	// Gen refresh token
-	//
+	tokenString, err := helpers.GetBearerToken(value)
 
-	return
+	if err != nil {
+		return res, errs.NewBadRequestError()
+	}
+
+	// Check latest refresh token in database
+	// user := obj.userRepository.CheckRefreshTokenExist(id, tokenString)
+
+	// check token is valid
+	token, err := obj.jwtToken.Validate(tokenString)
+
+	if err != nil {
+		return res, errs.NewUnauthorizedError()
+	}
+
+	_ = token
+
+	// gen new token
+	// accessToken, refreshToken, err := obj.jwtToken.GenToken(user.ID)
+
+	// if err != nil {
+	// 	return res, errs.NewUnexpectedError()
+	// }
+
+	// res = authResponse{
+	// 	AccessToken:  accessToken,
+	// 	RefreshToken: refreshToken,
+	// }
+
+	return res, nil
+}
+
+func (obj authService) Verify(headers map[string]string) error {
+
+	value, err := helpers.GetHeader(headers, "Authorization")
+
+	if err != nil {
+		return errs.NewBadRequestError()
+	}
+
+	tokenString, err := helpers.GetBearerToken(value)
+
+	if err != nil {
+		return errs.NewBadRequestError()
+	}
+
+	token, err := obj.jwtToken.Validate(tokenString)
+
+	fmt.Printf("Token Valid: %v \n", token.Valid)
+
+	if err != nil {
+		fmt.Printf("Error: %v \n", err.Error())
+		return errs.NewError(http.StatusOK, "Invalid Token")
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		fmt.Printf("Res: %v \n", claims)
+	}
+
+	return nil
 }

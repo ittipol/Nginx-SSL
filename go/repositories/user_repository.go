@@ -11,6 +11,7 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 }
 
 func (obj userRepository) GetUserByEmail(email string) (user User, err error) {
+	// obj.db.Find(&user)
 
 	return User{}, nil
 }

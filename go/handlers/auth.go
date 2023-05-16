@@ -10,4 +10,5 @@ type loginRequest struct {
 type AuthHandler interface {
 	Login(c *fiber.Ctx) error
 	Refresh(c *fiber.Ctx) error
+	Verify(c *fiber.Ctx) error
 }
