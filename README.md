@@ -16,6 +16,7 @@
 - gorm MySQL driver [https://pkg.go.dev/gorm.io/driver/mysql](https://pkg.go.dev/gorm.io/driver/mysql)
 - validator [https://pkg.go.dev/github.com/go-playground/validator](https://pkg.go.dev/github.com/go-playground/validator)
 - jwt [https://pkg.go.dev/github.com/golang-jwt/jwt](https://pkg.go.dev/github.com/golang-jwt/jwt)
+- bcrypt [https://pkg.go.dev/golang.org/x/crypto/bcrypt](https://pkg.go.dev/golang.org/x/crypto/bcrypt)
 
 ``` bash
 # Install zap package
@@ -31,13 +32,16 @@ go get github.com/gofiber/fiber/v2
 go get gorm.io/gorm
 
 # Install gorm MySQL driver package
-go gorm.io/driver/mysql
+go get gorm.io/driver/mysql
 
 # Install validator package
 go get github.com/go-playground/validator/v10
 
 # Install jwt package
 go get -u github.com/golang-jwt/jwt/v5
+
+# Install bcrypt package
+go get golang.org/x/crypto/bcrypt
 ```
 
 ## Start server and application

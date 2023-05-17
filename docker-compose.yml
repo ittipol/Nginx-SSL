@@ -21,6 +21,18 @@ services:
     build: go
     container_name: go
 
-  nextjs:
-    build: nextjs
-    container_name: nextjs
+  # nextjs:
+  #   build: nextjs
+  #   container_name: nextjs
+
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: test_db
+    # volumes:
+    #   - ./database:/docker-entrypoint-initdb.d
+    ports:
+      - 3306:3306

@@ -2,8 +2,13 @@ package helpers
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 )
+
+func GetVarType(any interface{}) reflect.Type {
+	return reflect.TypeOf(any)
+}
 
 func GetHeader(headers map[string]string, key string) (value string, err error) {
 

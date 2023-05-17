@@ -1,4 +1,4 @@
-package services
+package authsrv
 
 import (
 	"fmt"
@@ -6,10 +6,12 @@ import (
 	"go-nginx-ssl/appUtils"
 	"go-nginx-ssl/errs"
 	"go-nginx-ssl/helpers"
+	"go-nginx-ssl/logs"
 	"go-nginx-ssl/repositories"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type authService struct {
@@ -29,14 +31,23 @@ func (obj authService) Login(email string, password string) (res authResponse, e
 		return res, errs.NewNotFoundError("Invalid username or password")
 	}
 
-	// check password matching
-	_ = user.Password
+	// Check password matching
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+
+	if err != nil {
+		logs.Error(err)
+		return res, errs.NewUnauthorizedError()
+	}
 
 	accessToken, refreshToken, err := obj.jwtToken.GenToken(user.ID)
 
 	if err != nil {
+		logs.Error(err)
 		return res, errs.NewUnexpectedError()
 	}
+
+	// Save new refresh token into database
+	obj.userRepository.SaveRefreshToken(user.ID, refreshToken)
 
 	res = authResponse{
 		AccessToken:  accessToken,
@@ -48,41 +59,41 @@ func (obj authService) Login(email string, password string) (res authResponse, e
 
 func (obj authService) Refresh(headers map[string]string) (res authResponse, err error) {
 
-	value, err := helpers.GetHeader(headers, "Authorization")
+	value, _ := helpers.GetHeader(headers, "Authorization")
 
-	if err != nil {
-		return res, errs.NewBadRequestError()
-	}
+	tokenString, _ := helpers.GetBearerToken(value)
 
-	tokenString, err := helpers.GetBearerToken(value)
+	appJwtToken := appUtils.NewJwtUtil()
+	token, _ := appJwtToken.Validate(tokenString)
 
-	if err != nil {
-		return res, errs.NewBadRequestError()
-	}
+	claims, _ := token.Claims.(jwt.MapClaims)
+
+	id := int(claims["id"].(float64))
 
 	// Check latest refresh token in database
-	// user := obj.userRepository.CheckRefreshTokenExist(id, tokenString)
-
-	// check token is valid
-	token, err := obj.jwtToken.Validate(tokenString)
+	user, err := obj.userRepository.GetUserByRefreshToken(id, tokenString)
 
 	if err != nil {
-		return res, errs.NewUnauthorizedError()
+		logs.Error(err)
+		return res, errs.NewUnexpectedError()
 	}
 
-	_ = token
+	// Gen new token
+	accessToken, refreshToken, err := obj.jwtToken.GenToken(user.ID)
 
-	// gen new token
-	// accessToken, refreshToken, err := obj.jwtToken.GenToken(user.ID)
+	if err != nil {
+		return res, errs.NewUnexpectedError()
+	}
 
-	// if err != nil {
-	// 	return res, errs.NewUnexpectedError()
-	// }
+	// Save new refresh token into database
+	obj.userRepository.SaveRefreshToken(user.ID, refreshToken)
 
-	// res = authResponse{
-	// 	AccessToken:  accessToken,
-	// 	RefreshToken: refreshToken,
-	// }
+	res = authResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}
+
+	logs.Info(fmt.Sprintf("Res: %v", res))
 
 	return res, nil
 }
@@ -106,7 +117,7 @@ func (obj authService) Verify(headers map[string]string) error {
 	fmt.Printf("Token Valid: %v \n", token.Valid)
 
 	if err != nil {
-		fmt.Printf("Error: %v \n", err.Error())
+		logs.Error(fmt.Sprintf("Error: %v \n", err.Error()))
 		return errs.NewError(http.StatusOK, "Invalid Token")
 	}
 

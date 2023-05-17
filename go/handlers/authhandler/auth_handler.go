@@ -1,19 +1,20 @@
-package handlers
+package authhandler
 
 import (
 	"go-nginx-ssl/appUtils"
+	"go-nginx-ssl/handlers"
 	"go-nginx-ssl/logs"
-	"go-nginx-ssl/services"
+	"go-nginx-ssl/services/authsrv"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 type authHandler struct {
-	authService services.AuthService
+	authService authsrv.AuthService
 	validate    appUtils.ValidatorUtil
 }
 
-func NewAuthHandler(authService services.AuthService, validate appUtils.ValidatorUtil) AuthHandler {
+func NewAuthHandler(authService authsrv.AuthService, validate appUtils.ValidatorUtil) AuthHandler {
 	return &authHandler{authService, validate}
 }
 
@@ -23,31 +24,33 @@ func (obj authHandler) Login(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&req); err != nil {
 		logs.Error(err)
-		return handleError(c, err)
+		return handlers.HandleError(c, err)
 	}
 
 	if err := obj.validate.ValidatePayload(req); err != nil {
 		logs.Error(err)
-		return handleError(c, err)
+		return handlers.HandleError(c, err)
 	}
 
 	res, err := obj.authService.Login(req.Email, req.Password)
 	if err != nil {
-		logs.Error(err)
-		return handleError(c, err)
+		return handlers.HandleError(c, err)
 	}
 
-	return handleSuccessWithPayload(c, res)
+	return handlers.HandleSuccessWithPayload(c, res)
 }
 
 func (obj authHandler) Refresh(c *fiber.Ctx) error {
 	// Get refresh token from Header
 	// To prevent CSRF do not get refresh token from cookie
-	// headers := c.GetReqHeaders()
+	headers := c.GetReqHeaders()
 
-	// return new access token and refresh token
-	return c.JSON("ok")
+	res, err := obj.authService.Refresh(headers)
+	if err != nil {
+		return handlers.HandleError(c, err)
+	}
 
+	return handlers.HandleSuccessWithPayload(c, res)
 }
 
 func (obj authHandler) Verify(c *fiber.Ctx) error {
@@ -57,9 +60,8 @@ func (obj authHandler) Verify(c *fiber.Ctx) error {
 	err := obj.authService.Verify(headers)
 
 	if err != nil {
-		logs.Error(err)
-		return handleError(c, err)
+		return handlers.HandleError(c, err)
 	}
 
-	return handleSuccessWithMessage(c, "Valid Token")
+	return handlers.HandleSuccessWithMessage(c, "Valid Token")
 }

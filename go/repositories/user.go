@@ -10,4 +10,7 @@ type User struct {
 
 type UserRepository interface {
 	GetUserByEmail(email string) (user User, err error)
+	GetUserByRefreshToken(id int, refreshToken string) (user User, err error)
+	SaveRefreshToken(id int, refreshToken string) error
+	CreateUser(email string, hashedPassword string, name string) (id int, err error)
 }

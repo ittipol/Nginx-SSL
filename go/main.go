@@ -2,12 +2,17 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"go-nginx-ssl/appUtils"
-	"go-nginx-ssl/handlers"
+	"go-nginx-ssl/database"
+	"go-nginx-ssl/handlers/authhandler"
+	"go-nginx-ssl/handlers/userhandler"
 	"go-nginx-ssl/middlewares"
 	"go-nginx-ssl/repositories"
-	"go-nginx-ssl/services"
+	"go-nginx-ssl/services/authsrv"
+	"go-nginx-ssl/services/usersrv"
+
 	"log"
 	"strings"
 
@@ -31,14 +36,18 @@ func init() {
 
 func main() {
 
-	var db *gorm.DB
+	initTimeZone()
+	db := initDbConnection()
 
 	appValidator := appUtils.NewValidatorUtil()
 	appJwt := appUtils.NewJwtUtil()
 
 	userRepository := repositories.NewUserRepository(db)
-	authService := services.NewAuthService(userRepository, appJwt)
-	authHandler := handlers.NewAuthHandler(authService, appValidator)
+	authService := authsrv.NewAuthService(userRepository, appJwt)
+	userService := usersrv.NewUserService(userRepository)
+
+	authHandler := authhandler.NewAuthHandler(authService, appValidator)
+	userHandler := userhandler.NewUserHandler(userService)
 
 	app := fiber.New()
 
@@ -74,9 +83,12 @@ func main() {
 	// 	})
 	// })
 
-	app.Post("/auth", authHandler.Login)
+	app.Post("/login", authHandler.Login)
+	app.Use("/refresh", middlewares.AuthorizeJWT)
 	app.Post("/refresh", authHandler.Refresh)
 	// app.Post("/verify", authHandler.Verify)
+
+	app.Post("/register", userHandler.Register)
 
 	app.Use("/health", middlewares.AuthorizeJWT)
 	app.Get("/health", func(c *fiber.Ctx) error {
@@ -95,4 +107,31 @@ func main() {
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%v", viper.GetInt("app.port"))))
 
+}
+
+func initTimeZone() {
+	// LoadLocation looks for the IANA Time Zone database
+	// List of tz database time zones
+	// https: //en.wikipedia.org/wiki/List_of_tz_database_time_zones
+	location, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		panic(err)
+	}
+
+	// init system time zone
+	time.Local = location
+
+	// timeInUTC := time.Date(2018, 8, 30, 12, 0, 0, 0, time.UTC)
+	// fmt.Println(timeInUTC.In(location))
+}
+
+func initDbConnection() *gorm.DB {
+	return database.GetDbConnection(
+		viper.GetString("database.username"),
+		viper.GetString("database.password"),
+		viper.GetString("database.host"),
+		viper.GetInt("database.port"),
+		viper.GetString("database.db"),
+		false,
+	)
 }

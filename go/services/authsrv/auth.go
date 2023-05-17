@@ -1,4 +1,4 @@
-package services
+package authsrv
 
 type authResponse struct {
 	AccessToken  string `json:"access_token"`

@@ -37,9 +37,6 @@ func NewJwtUtil() JwtUtil {
 
 func (obj jwtUtil) GenToken(id int) (accessToken string, refreshToken string, err error) {
 
-	// accessTokenSecret = []byte(viper.GetString("jwtAccessTokenSecret"))
-	// refreshTokenSecret = []byte(viper.GetString("jwtRefreshTokenSecret"))
-
 	// Gen access token
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims{
 		id,
@@ -74,8 +71,6 @@ func (obj jwtUtil) GenToken(id int) (accessToken string, refreshToken string, er
 }
 
 func (obj jwtUtil) Validate(tokenString string) (token *jwt.Token, err error) {
-
-	// accessTokenSecret = []byte(viper.GetString("jwtAccessTokenSecret"))
 
 	token, err = jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
