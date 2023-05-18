@@ -15,11 +15,13 @@ services:
       - ./nginx/certs/server.crt:/etc/nginx/certs/nginx.crt
     depends_on:
       - go
-      - nextjs
+      # - nextjs
 
   go:
     build: go
     container_name: go
+    depends_on:
+      - db
 
   # nextjs:
   #   build: nextjs
@@ -29,10 +31,16 @@ services:
     image: mysql:8.0
     container_name: mysql
     restart: unless-stopped
+    env_file: .env
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: test_db
-    # volumes:
+      # MYSQL_ROOT_PASSWORD: 1234
+      # MYSQL_DATABASE: test_db
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+    volumes:
+      - ./data/mysql/log:/var/log/mysql
+    #   - db_data:${MARIADB_DATA_DIR}
+    #   - db_logs:${MARIADB_LOG_DIR}
     #   - ./database:/docker-entrypoint-initdb.d
     ports:
       - 3306:3306

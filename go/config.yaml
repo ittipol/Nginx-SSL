@@ -1,11 +1,11 @@
 app:
   port: 5000
-  jwtAccessTokenSecret: kmJs8h9pyvPZWCFg3NI6qs7k4TOtIFAZ
-  jwtRefreshTokenSecret: GniSVJoUWBofh5tu9tU7FTXcwGHUMH6z
+  jwt_access_token_secret: kmJs8h9pyvPZWCFg3NI6qs7k4TOtIFAZ
+  jwt_refresh_token_secret: GniSVJoUWBofh5tu9tU7FTXcwGHUMH6z
 
 database:
   username: root
   password: 1234
-  host: localhost
+  host: db
   port: 3306
   db: test_db

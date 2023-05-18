@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	accessTokenSecret  []byte = []byte(viper.GetString("jwtAccessTokenSecret"))
-	refreshTokenSecret []byte = []byte(viper.GetString("jwtRefreshTokenSecret"))
+	accessTokenSecret  []byte = []byte(viper.GetString("jwt-access-token-secret"))
+	refreshTokenSecret []byte = []byte(viper.GetString("jwt-refresh-token-secret"))
 )
 
 type accessTokenClaims struct {

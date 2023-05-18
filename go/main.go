@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"go-nginx-ssl/appUtils"
@@ -13,7 +14,6 @@ import (
 	"go-nginx-ssl/services/authsrv"
 	"go-nginx-ssl/services/usersrv"
 
-	"log"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -38,7 +38,7 @@ func main() {
 
 	initTimeZone()
 	db := initDbConnection()
-
+	// db.AutoMigrate(repositories.User{})
 	appValidator := appUtils.NewValidatorUtil()
 	appJwt := appUtils.NewJwtUtil()
 
@@ -47,7 +47,7 @@ func main() {
 	userService := usersrv.NewUserService(userRepository)
 
 	authHandler := authhandler.NewAuthHandler(authService, appValidator)
-	userHandler := userhandler.NewUserHandler(userService)
+	userHandler := userhandler.NewUserHandler(userService, appValidator)
 
 	app := fiber.New()
 
@@ -106,7 +106,6 @@ func main() {
 	})
 
 	log.Fatal(app.Listen(fmt.Sprintf(":%v", viper.GetInt("app.port"))))
-
 }
 
 func initTimeZone() {
