@@ -38,13 +38,16 @@ func main() {
 
 	initTimeZone()
 	db := initDbConnection()
-	// db.AutoMigrate(repositories.User{})
+
 	appValidator := appUtils.NewValidatorUtil()
-	appJwt := appUtils.NewJwtUtil()
+	appJwt := appUtils.NewJwtUtil(
+		[]byte(viper.GetString("app.jwt_access_token_secret")),
+		[]byte(viper.GetString("app.jwt_refresh_token_secret")),
+	)
 
 	userRepository := repositories.NewUserRepository(db)
 	authService := authsrv.NewAuthService(userRepository, appJwt)
-	userService := usersrv.NewUserService(userRepository)
+	userService := usersrv.NewUserService(userRepository, appJwt)
 
 	authHandler := authhandler.NewAuthHandler(authService, appValidator)
 	userHandler := userhandler.NewUserHandler(userService, appValidator)
@@ -84,11 +87,16 @@ func main() {
 	// })
 
 	app.Post("/login", authHandler.Login)
-	app.Use("/refresh", middlewares.AuthorizeJWT)
-	app.Post("/refresh", authHandler.Refresh)
-	// app.Post("/verify", authHandler.Verify)
+
+	app.Use("/token/refresh", middlewares.RefreshTokenAuthorizeJWT)
+	app.Post("/token/refresh", authHandler.Refresh)
+
+	app.Post("/verify", authHandler.Verify)
 
 	app.Post("/register", userHandler.Register)
+
+	app.Use("/user/profile", middlewares.AuthorizeJWT)
+	app.Get("/user/profile", userHandler.Profile)
 
 	app.Use("/health", middlewares.AuthorizeJWT)
 	app.Get("/health", func(c *fiber.Ctx) error {

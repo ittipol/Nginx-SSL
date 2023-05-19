@@ -10,4 +10,5 @@ type registerRequest struct {
 
 type UserHandler interface {
 	Register(c *fiber.Ctx) error
+	Profile(c *fiber.Ctx) error
 }

@@ -1,7 +1,6 @@
 package userhandler
 
 import (
-	"fmt"
 	"go-nginx-ssl/appUtils"
 	"go-nginx-ssl/handlers"
 	"go-nginx-ssl/logs"
@@ -28,8 +27,6 @@ func (obj userHandler) Register(c *fiber.Ctx) error {
 		return handlers.HandleError(c, err)
 	}
 
-	logs.Info(fmt.Sprintf("%v \n", req))
-
 	if err := obj.validate.ValidatePayload(req); err != nil {
 		logs.Error(err)
 		return handlers.HandleError(c, err)
@@ -41,4 +38,16 @@ func (obj userHandler) Register(c *fiber.Ctx) error {
 	}
 
 	return handlers.HandleSuccess(c)
+}
+
+func (obj userHandler) Profile(c *fiber.Ctx) error {
+
+	headers := c.GetReqHeaders()
+
+	res, err := obj.userService.Profile(headers)
+	if err != nil {
+		return handlers.HandleError(c, err)
+	}
+
+	return handlers.HandleSuccessWithPayload(c, res)
 }

@@ -6,6 +6,6 @@ app:
 database:
   username: root
   password: 1234
-  host: db
+  host: localhost
   port: 3306
   db: test_db

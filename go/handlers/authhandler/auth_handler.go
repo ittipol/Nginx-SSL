@@ -37,6 +37,15 @@ func (obj authHandler) Login(c *fiber.Ctx) error {
 		return handlers.HandleError(c, err)
 	}
 
+	c.Cookie(&fiber.Cookie{
+		Name:        "refresh-token",
+		Value:       res.RefreshToken,
+		SessionOnly: true,
+		HTTPOnly:    true,
+		Secure:      true,
+		SameSite:    "lax", // default is lax mode
+	})
+
 	return handlers.HandleSuccessWithPayload(c, res)
 }
 
@@ -49,6 +58,15 @@ func (obj authHandler) Refresh(c *fiber.Ctx) error {
 	if err != nil {
 		return handlers.HandleError(c, err)
 	}
+
+	c.Cookie(&fiber.Cookie{
+		Name:        "refresh-token",
+		Value:       res.RefreshToken,
+		SessionOnly: true,
+		HTTPOnly:    true,
+		Secure:      true,
+		SameSite:    "lax", // default is lax mode
+	})
 
 	return handlers.HandleSuccessWithPayload(c, res)
 }

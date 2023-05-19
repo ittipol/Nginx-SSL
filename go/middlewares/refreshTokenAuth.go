@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func AuthorizeJWT(c *fiber.Ctx) error {
+func RefreshTokenAuthorizeJWT(c *fiber.Ctx) error {
 
 	headers := c.GetReqHeaders()
 
@@ -30,7 +30,7 @@ func AuthorizeJWT(c *fiber.Ctx) error {
 		[]byte(viper.GetString("app.jwt_access_token_secret")),
 		[]byte(viper.GetString("app.jwt_refresh_token_secret")),
 	)
-	token, err := appJwt.Validate(tokenString, appUtils.AccessTokenSecretKey)
+	token, err := appJwt.Validate(tokenString, appUtils.RefreshTokenSecretKey)
 
 	if err != nil {
 		return fiber.ErrUnauthorized

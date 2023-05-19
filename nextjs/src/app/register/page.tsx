@@ -5,11 +5,12 @@ import { RegisterBody } from "@/models/register";
 import { userRegister } from "@/redux/features/user/userSlice";
 import { useAppDispatch } from "@/redux/hook";
 import { AppDispatch } from "@/redux/store";
-import { FormEvent, useRef } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { useRouter } from 'next/navigation';
 
 export default function Register() {
-    
+    const [error, setError] = useState<string>("")
+
     const router = useRouter();
     const dispatch:AppDispatch = useAppDispatch()
 
@@ -19,47 +20,57 @@ export default function Register() {
 
     const register = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log('The link was clicked.');
-
-        const body:RegisterBody = {
-            email: "abc@mail.com",
-            password: "1234",
-            name: "New Name"
-        }
+        console.log('Register form submitted');
 
         // const body:RegisterBody = {
-        //     email: textEmail.current?.value,
-        //     password: textPassword.current?.value,
-        //     name: textName.current?.value
+        //     email: "abc@mail.com",
+        //     password: "1234",
+        //     name: "New Name"
         // }
 
+        const body:RegisterBody = {
+            email: textEmail.current?.value,
+            password: textPassword.current?.value,
+            name: textName.current?.value
+        }
+
         const res = await dispatch(userRegister(body))
-        // const val = res.payload as ResponseData
+        // const val = res.payload as RegisterResponseResult
+
+        // console.table(res)
 
         if (res.meta.requestStatus === "fulfilled") {
             router.push("/")
         } else {
-            
+            setError("Cannot register user, Try to input new email or password or name")
         }
 
     }
 
     return (
         <div className="mx-auto w-full md:w-[400px]">
-            <form onSubmit={register} className="p-6 md:p-4">
-                <div className="mb-5">
-                    <input ref={textEmail} type="email" required className="w-full p-2 text-black outline-0 rounded-lg" />
+            <div className="p-6 md:p-4">
+                <div className="mb-4">
+                    <h2 className="text-xl">Register</h2>
+                    <div className="text-red-500">
+                        {error}
+                    </div>
                 </div>
-                <div className="mb-5">
-                    <input ref={textPassword} type="password" required className="w-full p-2 text-black outline-0 rounded-lg" />
-                </div>
-                <div className="mb-5">
-                    <input ref={textName} type="text" required className="w-full p-2 text-black outline-0 rounded-lg" />
-                </div>
-                <div>
-                    <button role="button" type="submit" className="w-1/5 p-1 rounded-lg bg-blue-800">Register</button>
-                </div>
-            </form>
+                <form onSubmit={register}>
+                    <div className="mb-5">
+                        <input ref={textEmail} type="email" required className="w-full p-2 text-black outline-0 rounded-lg" />
+                    </div>
+                    <div className="mb-5">
+                        <input ref={textPassword} type="password" required className="w-full p-2 text-black outline-0 rounded-lg" />
+                    </div>
+                    <div className="mb-5">
+                        <input ref={textName} type="text" required className="w-full p-2 text-black outline-0 rounded-lg" />
+                    </div>
+                    <div>
+                        <button role="button" type="submit" className="w-1/5 p-1 rounded-lg bg-blue-800">Register</button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }

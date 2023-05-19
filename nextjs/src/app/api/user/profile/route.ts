@@ -2,16 +2,20 @@ import externalApi from '@/util/externalApi';
 import { AxiosError } from 'axios';
 import { NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
+export async function GET(request: Request) {
 
-  const body = await request.json()
+  const headers = request.headers
 
   console.log('========================================')
-  console.log(body)
+  console.log(headers)
   console.log('========================================')
 
   try {
-    const res = await externalApi.post('/register', body)
+    const res = await externalApi.get('/user/profile',{
+      headers: {
+        // name:"data"
+      }
+    })
 
     return NextResponse.json(res.data,{
       status: res.status

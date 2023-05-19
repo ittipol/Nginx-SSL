@@ -36,7 +36,7 @@ func (obj authService) Login(email string, password string) (res authResponse, e
 
 	if err != nil {
 		logs.Error(err)
-		return res, errs.NewUnauthorizedError()
+		return res, errs.NewUnexpectedError()
 	}
 
 	accessToken, refreshToken, err := obj.jwtToken.GenToken(user.ID)
@@ -63,14 +63,13 @@ func (obj authService) Refresh(headers map[string]string) (res authResponse, err
 
 	tokenString, _ := helpers.GetBearerToken(value)
 
-	appJwtToken := appUtils.NewJwtUtil()
-	token, _ := appJwtToken.Validate(tokenString)
+	token, _ := obj.jwtToken.Validate(tokenString, appUtils.AccessTokenSecretKey)
 
 	claims, _ := token.Claims.(jwt.MapClaims)
 
 	id := int(claims["id"].(float64))
 
-	// Check latest refresh token in database
+	// Check it's latest refresh token in database
 	user, err := obj.userRepository.GetUserByRefreshToken(id, tokenString)
 
 	if err != nil {
@@ -93,8 +92,6 @@ func (obj authService) Refresh(headers map[string]string) (res authResponse, err
 		RefreshToken: refreshToken,
 	}
 
-	logs.Info(fmt.Sprintf("Res: %v", res))
-
 	return res, nil
 }
 
@@ -112,7 +109,7 @@ func (obj authService) Verify(headers map[string]string) error {
 		return errs.NewBadRequestError()
 	}
 
-	token, err := obj.jwtToken.Validate(tokenString)
+	token, err := obj.jwtToken.Validate(tokenString, appUtils.AccessTokenSecretKey)
 
 	fmt.Printf("Token Valid: %v \n", token.Valid)
 

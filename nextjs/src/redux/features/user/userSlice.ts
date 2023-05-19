@@ -1,7 +1,10 @@
 import api from "@/util/axios"
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { AxiosError } from "axios"
-import { RegisterBody } from "@/models/register";
+import { RegisterBody, RegisterResponseData, RegisterResponseResult } from "@/models/register";
+import { LoginResponseData, LoginResponseResult } from "@/models/login";
+import { ErrorResult } from "@/models/response";
+import { UserResponseData, UserResponseResult } from "@/models/user";
 
 export interface UserState {
     isAuth: boolean,
@@ -16,17 +19,24 @@ const initialState: UserState = {
 }
 
 export const userProfile = createAsyncThunk(
-    'user/me',
+    'user/profile',
     async (_, thunkAPI) => {
         
         try {
-            const res = await api.get<{name: string}>('profile')
-            return thunkAPI.fulfillWithValue<typeof res.data>(res.data)
+            const res = await api.get<UserResponseData>('user/profile')
 
+            // payload
+            return thunkAPI.fulfillWithValue<UserResponseResult>({
+                data: res.data,
+                status: res.status
+            })
         }
         catch (ex) {
             const error = ex as AxiosError
-            return thunkAPI.rejectWithValue(error.response?.status)
+            return thunkAPI.rejectWithValue({
+                error: error.response?.statusText,
+                status: error.response?.status
+            } as ErrorResult)
         }
 
     }
@@ -37,12 +47,21 @@ export const userLogin = createAsyncThunk(
     async (body :{email:string, password:string}, thunkAPI) => {
         
         try {
-            const res = await api.post<{accessToken: string}>('login', body)
-            return res.data
+            const res = await api.post<LoginResponseData>('login', body)
+            // return res.data
+
+            // payload
+            return thunkAPI.fulfillWithValue<LoginResponseResult>({
+                data: res.data,
+                status: res.status
+            })
         }
         catch (ex) {
             const error = ex as AxiosError
-            return thunkAPI.rejectWithValue(error.response?.status)
+            return thunkAPI.rejectWithValue({
+                error: error.response?.statusText,
+                status: error.response?.status
+            } as ErrorResult)
         }
         
     }
@@ -53,18 +72,42 @@ export const userRegister = createAsyncThunk(
     async (body: RegisterBody, thunkAPI) => {
 
         try {
-            const res = await api.post<{accessToken: string}>('register', body)
-            return {
+            const res = await api.post<RegisterResponseData>('register', body)
+
+            return thunkAPI.fulfillWithValue<RegisterResponseResult>({
                 data: res.data,
                 status: res.status
-            }
+            })
         }
         catch (ex) {
             const error = ex as AxiosError
             return thunkAPI.rejectWithValue({
-                data: error.response?.statusText,
+                error: error.response?.statusText,
                 status: error.response?.status
+            } as ErrorResult)
+        }
+
+    }
+)
+
+export const refreshToken = createAsyncThunk(
+    'user/token/refresh',
+    async (_, thunkAPI) => {
+
+        try {
+            const res = await api.post<RegisterResponseData>('token/refresh')
+
+            return thunkAPI.fulfillWithValue<RegisterResponseResult>({
+                data: res.data,
+                status: res.status
             })
+        }
+        catch (ex) {
+            const error = ex as AxiosError
+            return thunkAPI.rejectWithValue({
+                error: error.response?.statusText,
+                status: error.response?.status
+            } as ErrorResult)
         }
 
     }
@@ -78,7 +121,7 @@ export const userSlice = createSlice({
         builder
         .addCase(userLogin.fulfilled, (state, action) => {
             state.isAuth = true
-            state.accessToken = action.payload.accessToken
+            state.accessToken = action.payload.data.accessToken
         })
         .addCase(userLogin.rejected, (state, _) => {
             state.isAuth = false
@@ -93,7 +136,7 @@ export const userSlice = createSlice({
         })
 
         .addCase(userProfile.fulfilled, (state, action) => {
-            state.name = action.payload.name
+            state.name = action.payload.data.name
         })
         .addCase(userProfile.rejected, (state, action) => {
 

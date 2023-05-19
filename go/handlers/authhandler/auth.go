@@ -4,7 +4,7 @@ import "github.com/gofiber/fiber/v2"
 
 type loginRequest struct {
 	Email    string `validate:"required,email"`
-	Password string `validate:"required,min=1"`
+	Password string `validate:"required"`
 }
 
 type AuthHandler interface {

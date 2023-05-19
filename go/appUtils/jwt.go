@@ -5,12 +5,13 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/spf13/viper"
 )
 
-var (
-	accessTokenSecret  []byte = []byte(viper.GetString("jwt-access-token-secret"))
-	refreshTokenSecret []byte = []byte(viper.GetString("jwt-refresh-token-secret"))
+type SecretKeyType int
+
+const (
+	AccessTokenSecretKey SecretKeyType = iota
+	RefreshTokenSecretKey
 )
 
 type accessTokenClaims struct {
@@ -25,14 +26,16 @@ type refreshTokenClaims struct {
 
 type JwtUtil interface {
 	GenToken(id int) (accessToken string, refreshToken string, err error)
-	Validate(tokenString string) (token *jwt.Token, err error)
+	Validate(tokenString string, secretKeyType SecretKeyType) (token *jwt.Token, err error)
 }
 
 type jwtUtil struct {
+	accessTokenSecret  []byte
+	refreshTokenSecret []byte
 }
 
-func NewJwtUtil() JwtUtil {
-	return &jwtUtil{}
+func NewJwtUtil(accessTokenSecret []byte, refreshTokenSecret []byte) JwtUtil {
+	return &jwtUtil{accessTokenSecret, refreshTokenSecret}
 }
 
 func (obj jwtUtil) GenToken(id int) (accessToken string, refreshToken string, err error) {
@@ -48,7 +51,7 @@ func (obj jwtUtil) GenToken(id int) (accessToken string, refreshToken string, er
 		},
 	})
 	// Sign and get the complete encoded token as a string using the secret
-	accessToken, err = token.SignedString(accessTokenSecret)
+	accessToken, err = token.SignedString(obj.accessTokenSecret)
 
 	if err != nil {
 		return
@@ -65,12 +68,15 @@ func (obj jwtUtil) GenToken(id int) (accessToken string, refreshToken string, er
 		},
 	})
 	// Sign and get the complete encoded token as a string using the secret
-	refreshToken, err = token.SignedString(refreshTokenSecret)
+	refreshToken, err = token.SignedString(obj.refreshTokenSecret)
+
+	fmt.Printf("A_KEY: %v \n", obj.accessTokenSecret)
+	fmt.Printf("R_KEY: %v \n", obj.refreshTokenSecret)
 
 	return
 }
 
-func (obj jwtUtil) Validate(tokenString string) (token *jwt.Token, err error) {
+func (obj jwtUtil) Validate(tokenString string, secretKeyType SecretKeyType) (token *jwt.Token, err error) {
 
 	token, err = jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
@@ -78,7 +84,12 @@ func (obj jwtUtil) Validate(tokenString string) (token *jwt.Token, err error) {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return accessTokenSecret, nil
+		switch secretKeyType {
+		case RefreshTokenSecretKey:
+			return obj.refreshTokenSecret, nil
+		default:
+			return obj.accessTokenSecret, nil
+		}
 	})
 
 	return

@@ -11,18 +11,30 @@ export async function POST(request: Request) {
   console.log('========================================')
 
   try {
-    const res = await externalApi.post('/register', body)
+    const res = await externalApi.post('/login', body)
 
-    return NextResponse.json(res.data,{
+    const response = NextResponse.json(res.data,{
       status: res.status
     })
+
+    Object.keys(res.headers).forEach(
+      (key) => {
+          response.headers.set(key, res.headers[key])
+      }
+    )
+
+    return response
   } 
   catch(ex) {
     const error = ex as AxiosError
-    
-    return NextResponse.json(error.response?.statusText,{
+
+    const response = NextResponse.json(error.response?.statusText,{
       status: error.response?.status
     })
+
+    response.cookies.delete("refresh-token")
+
+    return response
   }
   
 }
