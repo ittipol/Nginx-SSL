@@ -1,5 +1,7 @@
 import './globals.css'
 import { Providers } from "@/redux/provider";
+import Header from '@/components/header';
+import Footer from '@/components/footer';
 
 export const metadata = {
   title: 'Next JS',
@@ -13,8 +15,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <Providers>{children}</Providers>
+      <body>        
+        <Providers>
+          <Header />
+          {children}
+          <Footer />
+        </Providers>
       </body>
     </html>
   )

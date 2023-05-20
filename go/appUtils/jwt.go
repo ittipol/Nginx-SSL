@@ -45,7 +45,7 @@ func (obj jwtUtil) GenToken(id int) (accessToken string, refreshToken string, er
 		id,
 		jwt.RegisteredClaims{
 			// A usual scenario is to set the expiration time relative to the current time
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(400 * time.Second)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(10 * time.Second)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
 		},

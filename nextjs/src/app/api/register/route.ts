@@ -26,3 +26,11 @@ export async function POST(request: Request) {
   }
   
 }
+
+export async function OPTIONS(request: Request) {
+
+  return NextResponse.json("",{
+    status: 200
+  })
+
+}

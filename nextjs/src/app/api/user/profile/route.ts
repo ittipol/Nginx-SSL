@@ -5,20 +5,24 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
 
   const headers = request.headers
+  let axiosReqHeaders = {} 
 
   console.log('========================================')
-  console.log(headers)
+  console.log(headers.has('Authorization'))
+  console.log(headers.get('Authorization'))
   console.log('========================================')
+
+  axiosReqHeaders = {...axiosReqHeaders, Authorization: headers.get('Authorization')}
+  // console.log(axiosReqHeaders)
 
   try {
-    const res = await externalApi.get('/user/profile',{
-      headers: {
-        // name:"data"
-      }
+    const res = await externalApi.get('/user/profile', {
+      headers: axiosReqHeaders
     })
 
     return NextResponse.json(res.data,{
-      status: res.status
+      // status: res.status
+      status: 401
     })
   } 
   catch(ex) {
@@ -29,4 +33,12 @@ export async function GET(request: Request) {
     })
   }
   
+}
+
+export async function OPTIONS(request: Request) {
+
+  return NextResponse.json("",{
+    status: 200
+  })
+
 }

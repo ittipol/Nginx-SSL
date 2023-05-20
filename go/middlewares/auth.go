@@ -13,7 +13,7 @@ import (
 func AuthorizeJWT(c *fiber.Ctx) error {
 
 	headers := c.GetReqHeaders()
-
+	fmt.Printf("Headers: %v\n\n", headers)
 	value, err := helpers.GetHeader(headers, "Authorization")
 
 	if err != nil {

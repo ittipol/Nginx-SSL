@@ -1,13 +1,15 @@
-"use client"
+// on top of the file where you are using handleClick because all components in Next 13 by default are server components
+"use client";
 
-import { LoginBody } from "@/models/login";
-import { userLogin, userProfile } from "@/redux/features/user/userSlice";
+import { RegisterBody } from "@/models/register";
+import { userLogin, userProfile, userRegister } from "@/redux/features/user/userSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { AppDispatch } from "@/redux/store";
-import { useRouter } from 'next/navigation';
 import { FormEvent, useRef, useState } from "react";
+import { useRouter } from 'next/navigation';
+import { LoginBody } from "@/models/login";
 
-const Login = () => {
+export default function Login() {
     const [error, setError] = useState<string>("")
 
     const router = useRouter();
@@ -28,7 +30,7 @@ const Login = () => {
 
         const res = await dispatch(userLogin(body))
 
-        console.table(res)
+        // console.table(res)
 
         if (res.meta.requestStatus === "fulfilled") {
             // router.push("/")
@@ -58,12 +60,11 @@ const Login = () => {
                         <input ref={textPassword} type="password" className="w-full p-2 text-black outline-0 rounded-lg" />
                     </div>
                     <div>
-                        <button role="button" type="submit" className="w-1/5 p-1 rounded-lg bg-blue-800">Register</button>
+                        <button role="button" type="submit" className="w-1/5 p-1 rounded-lg bg-blue-800">Login</button>
                     </div>
                 </form>
             </div>
+            <button onClick={() => dispatch(userProfile())}>Get profile</button>
         </div>
-    )
+    );
 }
-
-export default Login

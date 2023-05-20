@@ -1,7 +1,7 @@
 # NGINX SSL Server
 - Full Example Configuration https://www.nginx.com/resources/wiki/start/topics/examples/full/
 
-## Gen SSL private key & Cert 
+## Gen SSL Private key & Cert 
 ``` bash
 # Update hostname in gen.sh and ssl.cnf
 # e.g. hostname = localhost, myhost
@@ -43,6 +43,11 @@ go get -u github.com/golang-jwt/jwt/v5
 # Install bcrypt package
 go get golang.org/x/crypto/bcrypt
 ```
+
+## Software stack
+- Next.js (React)
+- Go
+- MySQL
 
 ## Start server and application
 
