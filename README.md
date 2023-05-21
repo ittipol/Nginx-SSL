@@ -1,4 +1,5 @@
-# NGINX SSL Server
+# NGINX
+## NGINX SSL Server
 - Full Example Configuration https://www.nginx.com/resources/wiki/start/topics/examples/full/
 
 ## Gen SSL Private key & Cert 
@@ -7,6 +8,11 @@
 # e.g. hostname = localhost, myhost
 ./gen.sh
 ```
+
+# Next.js (React) & Go
+
+## Uber Go Style Guide
+- https://github.com/uber-go/guide
 
 ## Go Packages
 - zap [https://pkg.go.dev/go.uber.org/zap](https://pkg.go.dev/go.uber.org/zap)
