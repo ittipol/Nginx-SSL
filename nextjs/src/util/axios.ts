@@ -7,7 +7,7 @@ const REQUEST_ATTEMP_TIMES = 1
 
 
 const api = axios.create({
-    // baseURL: "http://testhost:3000/api"
+    // baseURL: "http://abc:3000/api"
     baseURL: "/api"
 })
 
@@ -22,6 +22,8 @@ api.interceptors.request.use(
             config.headers!['Authorization'] = `Bearer ${val.user.accessToken}`
             // console.log(`Set Authorization Bearer ${val.user.accessToken}`)
         }
+
+        // config.headers!['Origin'] = ""
 
         return config
     },

@@ -5,6 +5,7 @@ import { RegisterBody, RegisterResponseData, RegisterResponseResult } from "@/mo
 import { LoginResponseData, LoginResponseResult } from "@/models/login";
 import { ErrorResult } from "@/models/response";
 import { UserResponseData, UserResponseResult } from "@/models/user";
+import { RefreshTokenResponseData, RefreshTokenResponseResult } from "@/models/refreshToken";
 
 export interface UserState {
     isAuth: boolean,
@@ -48,7 +49,6 @@ export const userLogin = createAsyncThunk(
         
         try {
             const res = await api.post<LoginResponseData>('login', body)
-            // return res.data
 
             // payload
             return thunkAPI.fulfillWithValue<LoginResponseResult>({
@@ -95,9 +95,9 @@ export const refreshToken = createAsyncThunk(
     async (_, thunkAPI) => {
 
         try {
-            const res = await api.post<RegisterResponseData>('token/refresh')
+            const res = await api.post<RefreshTokenResponseData>('token/refresh')
 
-            return thunkAPI.fulfillWithValue<RegisterResponseResult>({
+            return thunkAPI.fulfillWithValue<RefreshTokenResponseResult>({
                 data: res.data,
                 status: res.status
             })
@@ -119,6 +119,8 @@ export const userSlice = createSlice({
     reducers: { },
     extraReducers(builder) {
         builder
+
+        // userLogin
         .addCase(userLogin.fulfilled, (state, action) => {
             state.isAuth = true
             state.accessToken = action.payload.data.accessToken
@@ -128,6 +130,7 @@ export const userSlice = createSlice({
             state.accessToken = ''
         })
 
+        // userRegister
         .addCase(userRegister.fulfilled, (state, action) => {
             
         })
@@ -135,11 +138,22 @@ export const userSlice = createSlice({
             
         })
 
+        // userProfile
         .addCase(userProfile.fulfilled, (state, action) => {
             state.name = action.payload.data.name
         })
         .addCase(userProfile.rejected, (state, action) => {
 
+        })
+
+        // refreshToken
+        .addCase(refreshToken.fulfilled, (state, action) => {
+            state.isAuth = true
+            state.accessToken = action.payload.data.accessToken
+        })
+        .addCase(refreshToken.rejected, (state, _) => {
+            state.isAuth = false
+            state.accessToken = ''
         })
     },
 })

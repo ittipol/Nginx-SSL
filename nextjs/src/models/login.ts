@@ -12,3 +12,8 @@ export interface LoginResponseResult extends ResponseResult {
 export interface LoginResponseData {
     accessToken: string
 }
+
+export interface LoginResponseDataExternalApi {
+    accessToken: string
+    refreshToken: string
+}

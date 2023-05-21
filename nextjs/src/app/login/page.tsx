@@ -2,7 +2,7 @@
 "use client";
 
 import { RegisterBody } from "@/models/register";
-import { userLogin, userProfile, userRegister } from "@/redux/features/user/userSlice";
+import { refreshToken, userLogin, userProfile, userRegister } from "@/redux/features/user/userSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
 import { AppDispatch } from "@/redux/store";
 import { FormEvent, useRef, useState } from "react";
@@ -65,6 +65,8 @@ export default function Login() {
                 </form>
             </div>
             <button onClick={() => dispatch(userProfile())}>Get profile</button>
+            <hr />
+            <button onClick={() => dispatch(refreshToken())}>Refresh Token</button>
         </div>
     );
 }

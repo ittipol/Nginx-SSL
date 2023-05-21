@@ -52,9 +52,18 @@ func main() {
 	authHandler := authhandler.NewAuthHandler(authService, appValidator)
 	userHandler := userhandler.NewUserHandler(userService, appValidator)
 
+	// ========================================================================
+
 	app := fiber.New()
 
-	app.Use(logger.New(logger.Config{
+	// app.Use(cors.New(cors.Config{
+	// 	AllowOrigins:     "http://localhost",
+	// 	AllowHeaders:     "Origin, Content-Type, Authorization",
+	// 	AllowMethods:     "GET, POST, PUT, DELETE, OPTIONS",
+	// 	AllowCredentials: false,
+	// }))
+
+	app.Use(middlewares.CORS, logger.New(logger.Config{
 		// Format:     "${pid} ${status} - ${method} ${path}\n",
 		TimeFormat: "02-Jan-2006 15:04:05",
 		TimeZone:   "Asia/Bangkok",

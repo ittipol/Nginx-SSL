@@ -5,24 +5,19 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
 
   const headers = request.headers
-  let axiosReqHeaders = {} 
+  let reqHeaders = {}
 
-  console.log('========================================')
-  console.log(headers.has('Authorization'))
-  console.log(headers.get('Authorization'))
-  console.log('========================================')
-
-  axiosReqHeaders = {...axiosReqHeaders, Authorization: headers.get('Authorization')}
-  // console.log(axiosReqHeaders)
+  if(headers.has('Authorization')) {
+    reqHeaders = {...reqHeaders, Authorization: `${headers.get('Authorization')}`}
+  }
 
   try {
     const res = await externalApi.get('/user/profile', {
-      headers: axiosReqHeaders
+      headers: reqHeaders
     })
 
     return NextResponse.json(res.data,{
-      // status: res.status
-      status: 401
+      status: res.status
     })
   } 
   catch(ex) {

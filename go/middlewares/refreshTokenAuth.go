@@ -11,9 +11,9 @@ import (
 )
 
 func RefreshTokenAuthorizeJWT(c *fiber.Ctx) error {
-
+	fmt.Printf("RefreshTokenAuthorizeJWT\n\n")
 	headers := c.GetReqHeaders()
-
+	fmt.Printf("Headers: %v\n\n", headers)
 	value, err := helpers.GetHeader(headers, "Authorization")
 
 	if err != nil {
